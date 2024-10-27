@@ -77,7 +77,7 @@ impl PeselTrait for Pesel {
     }
 
     fn control_section(&self) -> u8 {
-        (self.0 >> CONTROL_SECTION_SHIFT & (2u64.pow(CONTROL_SECTION_SIZE as u32)) - 1) as u8
+        (self.0 >> CONTROL_SECTION_SHIFT & (2u64.pow(CONTROL_SECTION_SIZE as u32) - 1)) as u8
     }
 }
 

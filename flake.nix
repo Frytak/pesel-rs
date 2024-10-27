@@ -1,5 +1,5 @@
 {
-    description = "";
+    description = "PESEL validation and detail extraction with multiple data layout implementations.";
 
     inputs = {
         nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";

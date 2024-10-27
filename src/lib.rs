@@ -1,4 +1,4 @@
-//! [PESEL](https://en.wikipedia.org/wiki/PESEL) implementation.
+//! [PESEL](https://en.wikipedia.org/wiki/PESEL) validation and detail extraction with multiple data layout implementations.
 //!
 //! There is already the [pesel](https://docs.rs/pesel/latest/pesel/index.html) crate, you may want
 //! to check it out, but I've found it's implementation suboptimal for my case.
@@ -16,7 +16,7 @@
 //!
 //! - `DD` - Day of birth
 //! - `OOOO` - Ordinal number, where the last digit denotes the gender ([0, 2, 4, 6, 8] = female, [1,
-//! 3, 5, 7, 9] = male)
+//!   3, 5, 7, 9] = male)
 //! - `C` - Control number
 //!
 //! # Usage
@@ -24,23 +24,25 @@
 //! There are two PESEL structs provided by the crate, both implementing the [`PeselTrait`].
 //!
 //! - [`crate::bit_fields::Pesel`] - Stores each section of the PESEL in the following layout:
-//! `7 bits | YY | 5 bits | MM | 5 bits | DD | 5 bits | OOOO | 5 bits | C`, where in between bits
-//! are unused. Extracting each field is done using bitwise operations. You can get the human
-//! readable number using `u64::from`.
+//!   `7 bits | YY | 5 bits | MM | 5 bits | DD | 5 bits | OOOO | 5 bits | C`, where in between bits
+//!   are unused. Extracting each field is done using bitwise operations. You can get the human
+//!   readable number using `u64::from`.
 //!
 //! - [`crate::human_redable::Pesel`] - Stores the PESEL as a plain number, extracting each field
-//! requires modulo and division operations, if often accessing individual fields is important to
-//! you, you should probably use [`crate::bit_fields::Pesel`].
+//!   requires modulo and division operations, if often accessing individual fields is important to
+//!   you, you should probably use [`crate::bit_fields::Pesel`].
 //!
 //! If you just need to validate a number or extract a specific section without using the structs,
 //! you could use functions in the lib root. Most of these functions won't check if the value
 //! they're returning is valid, unlike the structs who are guaranteed to always return a valid
 //! value.
-//!
-//! # Features
-//! TODO
 pub mod human_redable;
 pub mod bit_fields;
+
+pub mod prelude {
+    pub use crate::{Gender, ValidationError, PeselTrait, validate};
+    pub use chrono::NaiveDate;
+}
 
 use chrono::NaiveDate;
 use thiserror::Error;
@@ -68,7 +70,7 @@ const PESEL_WEIGHTS: [u8; 11] = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3, 1];
 /// # Errors
 /// Returns `None` if:
 /// - `month_section` is not in range of `<1,92>`
-const fn month_from_section(month_section: u8) -> Option<u8> {
+pub const fn month_from_section(month_section: u8) -> Option<u8> {
     if !(1 <= month_section && month_section <= 92) { return None; }
 
     Some(month_section - (((month_section / 10) / 2) * 20))
@@ -78,7 +80,7 @@ const fn month_from_section(month_section: u8) -> Option<u8> {
 /// Returns `None` if:
 /// - `month` is not in range of `<1,12>`
 /// - `year` is not in range of `<1800,2299>`
-const fn month_to_section(month: u8, year: u16) -> Option<u8> {
+pub const fn month_to_section(month: u8, year: u16) -> Option<u8> {
     if !(1 <= month && month <= 12) { return None; }
     if !(1800 <= year && year <= 2299) { return None; }
 
@@ -93,7 +95,7 @@ const fn month_to_section(month: u8, year: u16) -> Option<u8> {
     Some(month + shift)
 }
 
-const fn year_from_sections(month_section: u8, year_section: u8) -> u16 {
+pub const fn year_from_sections(month_section: u8, year_section: u8) -> u16 {
     let shift = ((month_section / 10) / 2) * 2;
 
     (match shift {
@@ -257,7 +259,7 @@ pub fn validate(pesel: impl Into<u64>) -> Result<(), ValidationError> {
         if last_digit != 0 { return Err(ValidationError::ControlDigit); }
         Ok(())
     } else {
-        return Err(ValidationError::ControlDigit);
+        Err(ValidationError::ControlDigit)
     }
 }
 
