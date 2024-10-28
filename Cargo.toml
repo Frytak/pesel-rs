@@ -14,3 +14,9 @@ exclude = [ "flake.lock", "flake.nix" ]
 [dependencies]
 chrono = { version = "0.4", default-features = false }
 thiserror = "1.0"
+
+serde = { version = "1.0.213", features = [ "derive" ], optional = true }
+
+[features]
+default = [ ]
+serde = [ "dep:serde" ]

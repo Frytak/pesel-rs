@@ -13,6 +13,7 @@ pub const MONTH_SECTION_SHIFT: u8 = DAY_SECTION_SHIFT + DAY_SECTION_SIZE + 5;
 pub const YEAR_SECTION_SHIFT: u8 = MONTH_SECTION_SHIFT + MONTH_SECTION_SIZE + 5;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pesel(u64);
 
 impl From<Pesel> for u64 {

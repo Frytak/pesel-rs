@@ -39,6 +39,11 @@
 pub mod human_redable;
 pub mod bit_fields;
 
+pub use chrono;
+pub use thiserror;
+#[cfg(feature = "serde")]
+pub use serde;
+
 pub mod prelude {
     pub use crate::{Gender, ValidationError, PeselTrait, validate};
     pub use chrono::NaiveDate;
@@ -48,6 +53,7 @@ use chrono::NaiveDate;
 use thiserror::Error;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Gender {
     Male,
     Female,

@@ -1,6 +1,7 @@
 use super::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pesel(u64);
 
 impl From<Pesel> for u64 {
