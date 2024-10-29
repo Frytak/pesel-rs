@@ -52,14 +52,14 @@ pub mod prelude {
 use chrono::NaiveDate;
 use thiserror::Error;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Gender {
     Male,
     Female,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ValidationError {
     #[error("Pesel is too short.")]
     TooShort(usize),
@@ -266,6 +266,44 @@ pub fn validate(pesel: impl Into<u64>) -> Result<(), ValidationError> {
         Ok(())
     } else {
         Err(ValidationError::ControlDigit)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+#[error("{0}")]
+pub enum PeselTryFromError<T> {
+    ValidationError(#[from] ValidationError),
+    Other(T),
+}
+
+#[macro_export]
+macro_rules! impl_try_from_str_for_pesel {
+    ($name:ident) => {
+        impl TryFrom<&str> for $name {
+            type Error = PeselTryFromError<std::num::ParseIntError>;
+
+            fn try_from(value: &str) -> Result<Self, Self::Error> {
+                let value = u64::from_str_radix(value, 10).map_err(PeselTryFromError::Other)?;
+                validate(value)?;
+                Self::try_from(value).map_err(PeselTryFromError::ValidationError)
+            }
+        }
+
+        impl TryFrom<&String> for $name {
+            type Error = PeselTryFromError<std::num::ParseIntError>;
+
+            fn try_from(value: &String) -> Result<Self, Self::Error> {
+                Self::try_from(value.as_str())
+            }
+        }
+
+        impl TryFrom<String> for $name {
+            type Error = PeselTryFromError<std::num::ParseIntError>;
+
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_from(&value)
+            }
+        }
     }
 }
 

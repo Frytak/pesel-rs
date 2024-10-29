@@ -4,6 +4,8 @@ use super::*;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pesel(u64);
 
+impl_try_from_str_for_pesel!(Pesel);
+
 impl From<Pesel> for u64 {
     fn from(value: Pesel) -> Self {
         value.0
@@ -166,6 +168,15 @@ mod tests {
         assert_eq!(Pesel::try_from(435585930294485), Err(ValidationError::TooLong(15)));
         assert_eq!(Pesel::try_from(99990486167), Err(ValidationError::BirthDate));
         assert_eq!(Pesel::try_from(02290486167), Err(ValidationError::ControlDigit));
+    }
+
+    #[test]
+    fn try_from_strings() {
+        assert_eq!(PESEL1.to_owned(), Pesel::try_from(&String::from("02290486168")).unwrap());
+        assert_eq!(PESEL2.to_owned(), Pesel::try_from(&String::from("01302534699")).unwrap());
+        assert_eq!(PESEL3.to_owned(), Pesel::try_from(&String::from("00010128545")).unwrap());
+        assert_eq!(PESEL4.to_owned(), Pesel::try_from(&String::from("98250993285")).unwrap());
+        assert_eq!(PESEL5.to_owned(), Pesel::try_from(&String::from("60032417874")).unwrap());
     }
 }
 
