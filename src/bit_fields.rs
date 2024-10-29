@@ -37,10 +37,10 @@ impl From<Pesel> for u64 {
 impl From<&Pesel> for u64 {
     fn from(value: &Pesel) -> Self {
         value.control_section() as u64
-        + (value.ordinal_section() as u64) * 10u64.pow(1)
-        + (value.day_section() as u64) * 10u64.pow(5)
-        + (value.month_section() as u64) * 10u64.pow(7)
-        + (value.year_section() as u64) * 10u64.pow(9)
+            + (value.ordinal_section() as u64) * 10u64.pow(1)
+            + (value.day_section() as u64) * 10u64.pow(5)
+            + (value.month_section() as u64) * 10u64.pow(7)
+            + (value.year_section() as u64) * 10u64.pow(9)
     }
 }
 
@@ -51,10 +51,10 @@ impl TryFrom<u64> for Pesel {
         validate(value)?;
         let pesel = Pesel(
             ((crate::day_section(value) as u64) << DAY_SECTION_SHIFT as u64)
-            + ((crate::month_section(value) as u64) << MONTH_SECTION_SHIFT as u64)
-            + ((crate::year_section(value) as u64) << YEAR_SECTION_SHIFT as u64)
-            + ((crate::ordinal_section(value) as u64) << ORDINAL_SECTION_SHIFT as u64)
-            + ((crate::control_section(value) as u64) << CONTROL_SECTION_SHIFT as u64)
+                + ((crate::month_section(value) as u64) << MONTH_SECTION_SHIFT as u64)
+                + ((crate::year_section(value) as u64) << YEAR_SECTION_SHIFT as u64)
+                + ((crate::ordinal_section(value) as u64) << ORDINAL_SECTION_SHIFT as u64)
+                + ((crate::control_section(value) as u64) << CONTROL_SECTION_SHIFT as u64),
         );
         Ok(pesel)
     }
@@ -64,10 +64,10 @@ impl From<crate::human_redable::Pesel> for Pesel {
     fn from(value: crate::human_redable::Pesel) -> Self {
         Self(
             ((value.day_section() as u64) << DAY_SECTION_SHIFT as u64)
-            + ((value.month_section() as u64) << MONTH_SECTION_SHIFT as u64)
-            + ((value.year_section() as u64) << YEAR_SECTION_SHIFT as u64)
-            + ((value.ordinal_section() as u64) << ORDINAL_SECTION_SHIFT as u64)
-            + ((value.control_section() as u64) << CONTROL_SECTION_SHIFT as u64)
+                + ((value.month_section() as u64) << MONTH_SECTION_SHIFT as u64)
+                + ((value.year_section() as u64) << YEAR_SECTION_SHIFT as u64)
+                + ((value.ordinal_section() as u64) << ORDINAL_SECTION_SHIFT as u64)
+                + ((value.control_section() as u64) << CONTROL_SECTION_SHIFT as u64),
         )
     }
 }
@@ -179,11 +179,26 @@ mod tests {
 
     #[test]
     fn date_of_birth() {
-        assert_eq!(PESEL1.date_of_birth(), NaiveDate::from_ymd_opt(2002, 09, 04).unwrap());
-        assert_eq!(PESEL2.date_of_birth(), NaiveDate::from_ymd_opt(2001, 10, 25).unwrap());
-        assert_eq!(PESEL3.date_of_birth(), NaiveDate::from_ymd_opt(1900, 01, 01).unwrap());
-        assert_eq!(PESEL4.date_of_birth(), NaiveDate::from_ymd_opt(2098, 05, 09).unwrap());
-        assert_eq!(PESEL5.date_of_birth(), NaiveDate::from_ymd_opt(1960, 03, 24).unwrap());
+        assert_eq!(
+            PESEL1.date_of_birth(),
+            NaiveDate::from_ymd_opt(2002, 09, 04).unwrap()
+        );
+        assert_eq!(
+            PESEL2.date_of_birth(),
+            NaiveDate::from_ymd_opt(2001, 10, 25).unwrap()
+        );
+        assert_eq!(
+            PESEL3.date_of_birth(),
+            NaiveDate::from_ymd_opt(1900, 01, 01).unwrap()
+        );
+        assert_eq!(
+            PESEL4.date_of_birth(),
+            NaiveDate::from_ymd_opt(2098, 05, 09).unwrap()
+        );
+        assert_eq!(
+            PESEL5.date_of_birth(),
+            NaiveDate::from_ymd_opt(1960, 03, 24).unwrap()
+        );
     }
 
     #[test]
@@ -198,18 +213,41 @@ mod tests {
     #[test]
     fn invalid_pesels() {
         assert_eq!(Pesel::try_from(4355), Err(ValidationError::TooShort(4)));
-        assert_eq!(Pesel::try_from(435585930294485), Err(ValidationError::TooLong(15)));
-        assert_eq!(Pesel::try_from(99990486167), Err(ValidationError::BirthDate));
-        assert_eq!(Pesel::try_from(02290486167), Err(ValidationError::ControlDigit));
+        assert_eq!(
+            Pesel::try_from(435585930294485),
+            Err(ValidationError::TooLong(15))
+        );
+        assert_eq!(
+            Pesel::try_from(99990486167),
+            Err(ValidationError::BirthDate)
+        );
+        assert_eq!(
+            Pesel::try_from(02290486167),
+            Err(ValidationError::ControlDigit)
+        );
     }
 
     #[test]
     fn try_from_strings() {
-        assert_eq!(PESEL1.to_owned(), Pesel::try_from(&String::from("02290486168")).unwrap());
-        assert_eq!(PESEL2.to_owned(), Pesel::try_from(&String::from("01302534699")).unwrap());
-        assert_eq!(PESEL3.to_owned(), Pesel::try_from(&String::from("00010128545")).unwrap());
-        assert_eq!(PESEL4.to_owned(), Pesel::try_from(&String::from("98250993285")).unwrap());
-        assert_eq!(PESEL5.to_owned(), Pesel::try_from(&String::from("60032417874")).unwrap());
+        assert_eq!(
+            PESEL1.to_owned(),
+            Pesel::try_from(&String::from("02290486168")).unwrap()
+        );
+        assert_eq!(
+            PESEL2.to_owned(),
+            Pesel::try_from(&String::from("01302534699")).unwrap()
+        );
+        assert_eq!(
+            PESEL3.to_owned(),
+            Pesel::try_from(&String::from("00010128545")).unwrap()
+        );
+        assert_eq!(
+            PESEL4.to_owned(),
+            Pesel::try_from(&String::from("98250993285")).unwrap()
+        );
+        assert_eq!(
+            PESEL5.to_owned(),
+            Pesel::try_from(&String::from("60032417874")).unwrap()
+        );
     }
 }
-

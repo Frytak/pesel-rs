@@ -72,29 +72,29 @@
 //!     for<'a> u64: From<&'a T>
 //! {
 //!     assert!(pesels.len() > 0);
-//! 
+//!
 //!     let mut oldest_index = 0;
 //!     pesels.iter().skip(1).enumerate().for_each(|(i, pesel)| {
 //!         if pesels[oldest_index].date_of_birth() < pesel.date_of_birth() {
 //!             oldest_index = i;
 //!         }
 //!     });
-//! 
+//!
 //!     let date_of_birth = pesels[oldest_index].date_of_birth();
 //!     println!("PESEL nr. {oldest_index} is the oldest! Born at {date_of_birth}")
 //! }
 //! ```
 
-pub mod human_redable;
 pub mod bit_fields;
+pub mod human_redable;
 
 pub use chrono;
-pub use thiserror;
 #[cfg(feature = "serde")]
 pub use serde;
+pub use thiserror;
 
 pub mod prelude {
-    pub use crate::{Gender, PeselTrait, validate};
+    pub use crate::{validate, Gender, PeselTrait};
     pub use chrono::NaiveDate;
 }
 
@@ -126,7 +126,9 @@ const PESEL_WEIGHTS: [u8; 11] = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3, 1];
 /// Returns `None` if:
 /// - `month_section` is not in range of `<1,92>`
 pub const fn month_from_section(month_section: u8) -> Option<u8> {
-    if !(1 <= month_section && month_section <= 92) { return None; }
+    if !(1 <= month_section && month_section <= 92) {
+        return None;
+    }
 
     Some(month_section - (((month_section / 10) / 2) * 20))
 }
@@ -136,8 +138,12 @@ pub const fn month_from_section(month_section: u8) -> Option<u8> {
 /// - `month` is not in range of `<1,12>`
 /// - `year` is not in range of `<1800,2299>`
 pub const fn month_to_section(month: u8, year: u16) -> Option<u8> {
-    if !(1 <= month && month <= 12) { return None; }
-    if !(1800 <= year && year <= 2299) { return None; }
+    if !(1 <= month && month <= 12) {
+        return None;
+    }
+    if !(1800 <= year && year <= 2299) {
+        return None;
+    }
 
     // TODO: Find a better conversion method
     let base = ((year / 100) - 10) as u8;
@@ -168,7 +174,8 @@ pub const fn year_from_sections(month_section: u8, year_section: u8) -> u16 {
 pub trait PeselTrait: TryFrom<u64> + Into<u64>
 where
     u64: From<Self>,
-    for<'a> u64: From<&'a Self> {
+    for<'a> u64: From<&'a Self>,
+{
     /// Day of birth section.
     fn day_section(&self) -> u8;
 
@@ -209,7 +216,7 @@ where
             None => unreachable!(),
         }
     }
-    
+
     /// Gender.
     fn gender(&self) -> Gender {
         gender(self)
@@ -266,8 +273,11 @@ pub fn date_of_birth(pesel: impl Into<u64>) -> Option<NaiveDate> {
     let pesel = pesel.into();
     NaiveDate::from_ymd_opt(
         year(pesel) as i32,
-        match month(pesel) { Some(month) => month as u32, None => return None, },
-        day(pesel) as u32
+        match month(pesel) {
+            Some(month) => month as u32,
+            None => return None,
+        },
+        day(pesel) as u32,
     )
 }
 
@@ -286,32 +296,41 @@ pub fn validate(pesel: impl Into<u64>) -> Result<(), ValidationError> {
     let mut pesel_str = pesel.to_string();
 
     if pesel_str.len() < 8 {
-        return Err(ValidationError::TooShort(pesel_str.len()))
+        return Err(ValidationError::TooShort(pesel_str.len()));
     }
 
     if pesel_str.len() > 11 {
-        return Err(ValidationError::TooLong(pesel_str.len()))
+        return Err(ValidationError::TooLong(pesel_str.len()));
     }
 
     if pesel_str.len() < 11 {
         let mut new_value_str = "0".to_string();
 
-        for _ in (pesel_str.len()+1)..11 {
+        for _ in (pesel_str.len() + 1)..11 {
             new_value_str.push('0');
         }
 
         pesel_str = new_value_str + &pesel_str;
     }
 
-    if date_of_birth(pesel).is_none() { return Err(ValidationError::BirthDate); }
+    if date_of_birth(pesel).is_none() {
+        return Err(ValidationError::BirthDate);
+    }
 
     let mut sum = 0;
-    for (i, digit) in pesel_str.chars().take(11).map(|char| char.to_digit(10).unwrap()).enumerate() {
+    for (i, digit) in pesel_str
+        .chars()
+        .take(11)
+        .map(|char| char.to_digit(10).unwrap())
+        .enumerate()
+    {
         sum += (digit as u8) * PESEL_WEIGHTS[i];
     }
 
     if let Some(Some(last_digit)) = sum.to_string().chars().last().map(|char| char.to_digit(10)) {
-        if last_digit != 0 { return Err(ValidationError::ControlDigit); }
+        if last_digit != 0 {
+            return Err(ValidationError::ControlDigit);
+        }
         Ok(())
     } else {
         Err(ValidationError::ControlDigit)
@@ -353,7 +372,7 @@ macro_rules! impl_try_from_str_for_pesel {
                 Self::try_from(&value)
             }
         }
-    }
+    };
 }
 
 #[cfg(test)]
@@ -447,11 +466,26 @@ mod tests {
 
     #[test]
     fn date_of_birth() {
-        assert_eq!(super::date_of_birth(PESEL1), NaiveDate::from_ymd_opt(2002, 09, 04));
-        assert_eq!(super::date_of_birth(PESEL2), NaiveDate::from_ymd_opt(2001, 10, 25));
-        assert_eq!(super::date_of_birth(PESEL3), NaiveDate::from_ymd_opt(1900, 01, 01));
-        assert_eq!(super::date_of_birth(PESEL4), NaiveDate::from_ymd_opt(2098, 05, 09));
-        assert_eq!(super::date_of_birth(PESEL5), NaiveDate::from_ymd_opt(1960, 03, 24));
+        assert_eq!(
+            super::date_of_birth(PESEL1),
+            NaiveDate::from_ymd_opt(2002, 09, 04)
+        );
+        assert_eq!(
+            super::date_of_birth(PESEL2),
+            NaiveDate::from_ymd_opt(2001, 10, 25)
+        );
+        assert_eq!(
+            super::date_of_birth(PESEL3),
+            NaiveDate::from_ymd_opt(1900, 01, 01)
+        );
+        assert_eq!(
+            super::date_of_birth(PESEL4),
+            NaiveDate::from_ymd_opt(2098, 05, 09)
+        );
+        assert_eq!(
+            super::date_of_birth(PESEL5),
+            NaiveDate::from_ymd_opt(1960, 03, 24)
+        );
     }
 
     #[test]
@@ -475,9 +509,17 @@ mod tests {
     #[test]
     fn invalid_pesels() {
         assert_eq!(super::validate(4355u64), Err(ValidationError::TooShort(4)));
-        assert_eq!(super::validate(435585930294485u64), Err(ValidationError::TooLong(15)));
-        assert_eq!(super::validate(99990486167u64), Err(ValidationError::BirthDate));
-        assert_eq!(super::validate(02290486167u64), Err(ValidationError::ControlDigit));
+        assert_eq!(
+            super::validate(435585930294485u64),
+            Err(ValidationError::TooLong(15))
+        );
+        assert_eq!(
+            super::validate(99990486167u64),
+            Err(ValidationError::BirthDate)
+        );
+        assert_eq!(
+            super::validate(02290486167u64),
+            Err(ValidationError::ControlDigit)
+        );
     }
 }
-
