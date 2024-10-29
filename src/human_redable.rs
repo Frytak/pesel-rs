@@ -1,5 +1,9 @@
 use super::*;
 
+/// Stores the PESEL as is, in human redable form.
+///
+/// Used when frequently reading the human redable representation without accessing the individual
+/// fields.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pesel(u64);

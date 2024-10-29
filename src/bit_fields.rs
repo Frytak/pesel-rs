@@ -12,6 +12,16 @@ pub const DAY_SECTION_SHIFT: u8 = ORDINAL_SECTION_SHIFT + ORDINAL_SECTION_SIZE +
 pub const MONTH_SECTION_SHIFT: u8 = DAY_SECTION_SHIFT + DAY_SECTION_SIZE + 5;
 pub const YEAR_SECTION_SHIFT: u8 = MONTH_SECTION_SHIFT + MONTH_SECTION_SIZE + 5;
 
+/// Stores each section of the PESEL in the following layout:
+///
+/// `------------------------------------------------------------------------`
+/// `| 7 bits | YY | 5 bits | MM | 5 bits | DD | 5 bits | OOOO | 5 bits | C |`
+/// `------------------------------------------------------------------------`
+///
+/// In between bits are unused. Extracting each field is done using bitwise operations.
+/// You can get the human readable number using `u64::from`.
+///
+/// Used when frequently reading individual fields.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pesel(u64);

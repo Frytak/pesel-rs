@@ -53,7 +53,6 @@
 //!                 let gender = if pesel.gender() == Gender::Male { "boy" } else { "girl" };
 //!                 println!("Wow {first_name}! You're such a young {gender}!");
 //!             } else {
-//!
 //!                 println!("{first_name}, you're very old, I'm sorry 😞");
 //!             }
 //!         }
@@ -85,6 +84,7 @@
 //!     println!("PESEL nr. {oldest_index} is the oldest! Born at {date_of_birth}")
 //! }
 //! ```
+
 pub mod human_redable;
 pub mod bit_fields;
 
