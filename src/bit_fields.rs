@@ -23,10 +23,13 @@ pub const YEAR_SECTION_SHIFT: u8 = MONTH_SECTION_SHIFT + MONTH_SECTION_SIZE + 5;
 ///
 /// Used when frequently reading individual fields.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Pesel(u64);
 
 impl_try_from_str_for_pesel!(Pesel);
+
+#[cfg(feature = "serde")]
+impl_pesel_deserializer!(Pesel);
 
 impl From<Pesel> for u64 {
     fn from(value: Pesel) -> Self {
@@ -249,5 +252,71 @@ mod tests {
             PESEL5.to_owned(),
             Pesel::try_from(&String::from("60032417874")).unwrap()
         );
+    }
+
+    #[test]
+    #[cfg(feature = "serde")]
+    fn deserialize() {
+        use serde_json::{from_value, json};
+
+        assert_eq!(
+            PESEL1.to_owned(),
+            from_value::<Pesel>(json!("02290486168")).expect("Valid PESEL")
+        );
+        assert_eq!(
+            PESEL1.to_owned(),
+            from_value::<Pesel>(json!(02290486168u64)).expect("Valid PESEL")
+        );
+
+        assert_eq!(
+            PESEL2.to_owned(),
+            from_value::<Pesel>(json!("01302534699")).expect("Valid PESEL")
+        );
+        assert_eq!(
+            PESEL2.to_owned(),
+            from_value::<Pesel>(json!(01302534699u64)).expect("Valid PESEL")
+        );
+
+        assert_eq!(
+            PESEL3.to_owned(),
+            from_value::<Pesel>(json!("00010128545")).expect("Valid PESEL")
+        );
+        assert_eq!(
+            PESEL3.to_owned(),
+            from_value::<Pesel>(json!(00010128545u64)).expect("Valid PESEL")
+        );
+
+        assert_eq!(
+            PESEL4.to_owned(),
+            from_value::<Pesel>(json!("98250993285")).expect("Valid PESEL")
+        );
+        assert_eq!(
+            PESEL4.to_owned(),
+            from_value::<Pesel>(json!(98250993285u64)).expect("Valid PESEL")
+        );
+
+        assert_eq!(
+            PESEL5.to_owned(),
+            from_value::<Pesel>(json!("60032417874")).expect("Valid PESEL")
+        );
+        assert_eq!(
+            PESEL5.to_owned(),
+            from_value::<Pesel>(json!(60032417874u64)).expect("Valid PESEL")
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "serde")]
+    fn invalid_deserialize() {
+        use serde_json::{from_value, json};
+
+        from_value::<Pesel>(json!("60036817874")).expect_err("Invalid PESEL");
+        from_value::<Pesel>(json!(60036817874u64)).expect_err("Invalid PESEL");
+
+        from_value::<Pesel>(json!("00006817874")).expect_err("Invalid PESEL");
+        from_value::<Pesel>(json!(00006817874u64)).expect_err("Invalid PESEL");
+
+        from_value::<Pesel>(json!("02290486167")).expect_err("Invalid PESEL");
+        from_value::<Pesel>(json!(02290486167u64)).expect_err("Invalid PESEL");
     }
 }

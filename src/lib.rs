@@ -122,6 +122,66 @@ pub enum ValidationError {
 
 const PESEL_WEIGHTS: [u8; 11] = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3, 1];
 
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", macro_export)]
+macro_rules! impl_pesel_visitor {
+    ($name:ident) => {
+        pub struct PeselVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for PeselVisitor {
+            type Value = $name;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                write!(formatter, "a valid PESEL as u64, &str, &'de str, or String")
+            }
+
+            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                $name::try_from(v).map_err(|err| serde::de::Error::custom(err.to_string()))
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                $name::try_from(v).map_err(|err| serde::de::Error::custom(err.to_string()))
+            }
+
+            fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                $name::try_from(v).map_err(|err| serde::de::Error::custom(err.to_string()))
+            }
+
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                $name::try_from(v).map_err(|err| serde::de::Error::custom(err.to_string()))
+            }
+        }
+    };
+}
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", macro_export)]
+macro_rules! impl_pesel_deserializer {
+    ($name:ident) => {
+        impl_pesel_visitor!($name);
+
+        impl<'de> serde::Deserialize<'de> for $name {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                deserializer.deserialize_any(PeselVisitor)
+            }
+        }
+    };
+}
+
 /// # Errors
 /// Returns `None` if:
 /// - `month_section` is not in range of `<1,92>`
