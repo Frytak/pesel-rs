@@ -23,10 +23,19 @@ pub const YEAR_SECTION_SHIFT: u8 = MONTH_SECTION_SHIFT + MONTH_SECTION_SIZE + 5;
 ///
 /// Used when frequently reading individual fields.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Pesel(u64);
 
 impl_try_from_str_for_pesel!(Pesel);
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for Pesel {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u64(u64::from(self))
+    }
+}
 
 #[cfg(feature = "serde")]
 impl_pesel_deserializer!(Pesel);
@@ -318,5 +327,17 @@ mod tests {
 
         from_value::<Pesel>(json!("02290486167")).expect_err("Invalid PESEL");
         from_value::<Pesel>(json!(02290486167u64)).expect_err("Invalid PESEL");
+    }
+
+    #[test]
+    #[cfg(feature = "serde")]
+    fn serialize() {
+        use serde_json::{json, to_value};
+
+        assert_eq!(to_value(PESEL1.to_owned()).unwrap(), json!(02290486168u64));
+        assert_eq!(to_value(PESEL2.to_owned()).unwrap(), json!(01302534699u64));
+        assert_eq!(to_value(PESEL3.to_owned()).unwrap(), json!(00010128545u64));
+        assert_eq!(to_value(PESEL4.to_owned()).unwrap(), json!(98250993285u64));
+        assert_eq!(to_value(PESEL5.to_owned()).unwrap(), json!(60032417874u64));
     }
 }
