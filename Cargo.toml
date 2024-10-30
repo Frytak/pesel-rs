@@ -1,6 +1,6 @@
 [package]
 name = "pesel-rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = [ "Piotr Niepsuj <piotr_niepsuj@outlook.com>" ]
 description = "PESEL validation and detail extraction with multiple data layout implementations."
@@ -15,7 +15,7 @@ exclude = [ "flake.lock", "flake.nix" ]
 chrono = { version = "0.4", default-features = false }
 thiserror = "1.0"
 
-serde = { version = "1.0.213", features = [ "derive" ], optional = true }
+serde = { version = "1.0", features = [ "derive" ], optional = true }
 
 [features]
 default = [ ]
