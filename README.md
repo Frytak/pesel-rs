@@ -21,17 +21,17 @@ PESEL: `YYMMDDOOOOC`
 
 # Usage
 
-There are two PESEL structs provided by the crate, both implementing the [`PeselTrait`].
+There are two PESEL structs provided by the crate, both implementing the [`PeselTrait`](https://docs.rs/pesel-rs/latest/pesel_rs/trait.PeselTrait.html).
 
-- [`crate::bit_fields::Pesel`] - Stores each section of the PESEL in the following layout: `7 bits | YY | 5 bits | MM | 5 bits | DD | 5 bits | OOOO | 5 bits | C`, where in between bits are unused. Extracting each field is done using bitwise operations. You can get the human readable number using `u64::from`.
+- [`crate::bit_fields::Pesel`](https://docs.rs/pesel-rs/latest/pesel_rs/bit_fields/struct.Pesel.html) - Stores each section of the PESEL in the following layout: `7 bits | YY | 5 bits | MM | 5 bits | DD | 5 bits | OOOO | 5 bits | C`, where in between bits are unused. Extracting each field is done using bitwise operations. You can get the human readable number using `u64::from`.
 
-- [`crate::human_redable::Pesel`] - Stores the PESEL as a plain number, extracting each field requires modulo and division operations, if often accessing individual fields is important to you, you should probably use [`crate::bit_fields::Pesel`].
+- [`crate::human_redable::Pesel`](https://docs.rs/pesel-rs/latest/pesel_rs/human_redable/struct.Pesel.html) - Stores the PESEL as a plain number, extracting each field requires modulo and division operations, if often accessing individual fields is important to you, you should probably use [`crate::bit_fields::Pesel`](https://docs.rs/pesel-rs/latest/pesel_rs/bit_fields/struct.Pesel.html).
 
 If you just need to validate a number or extract a specific section without using the structs, you could use functions in the lib root. Most of these functions won't check if the value they're returning is valid, unlike the structs who are guaranteed to always return a valid value.
 
 # Examples
 
-Function that takes a name and welcomes the person based on date of birth and gender from the PESEL. Implemented using [`crate::bit_fields::Pesel`] because we're mostly reading the fields.
+Function that takes a name and welcomes the person based on date of birth and gender from the PESEL. Implemented using [`crate::bit_fields::Pesel`](https://docs.rs/pesel-rs/latest/pesel_rs/bit_fields/struct.Pesel.html) because we're mostly reading the fields.
 
 ```rust
 use pesel_rs::{prelude::*, bit_fields::Pesel};
@@ -51,7 +51,7 @@ fn welcome(first_name: &str, pesel: u64) {
 }
 ```
 
-Function finding a pesel with the oldest date of birth. Working with a generic PESEL, we introduce additional bounds (required by [`PeselTrait`]).
+Function finding a pesel with the oldest date of birth. Working with a generic PESEL, we introduce additional bounds (required by [`PeselTrait`](https://docs.rs/pesel-rs/latest/pesel_rs/trait.PeselTrait.html)).
 ```rust
 use pesel_rs::prelude::*;
 
