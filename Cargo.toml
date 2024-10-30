@@ -1,6 +1,6 @@
 [package]
 name = "pesel-rs"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = [ "Piotr Niepsuj <piotr_niepsuj@outlook.com>" ]
 description = "PESEL validation and detail extraction with multiple data layout implementations."
